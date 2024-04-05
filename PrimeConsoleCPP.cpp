@@ -1,50 +1,43 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <cmath>
+#include <numeric>
+#include <chrono>
 
-// Function to check if a number is prime
-bool isPrime(int number) {
-    if (number <= 1)
-        return false;
-    if (number == 2)
-        return true;
-    if (number % 2 == 0)
-        return false;
-    for (int i = 3; i <= sqrt(number); i += 2) {
-        if (number % i == 0)
-            return false;
-    }
-    return true;
-}
+constexpr unsigned long long ITERATIONS_PER_THREAD = 1000000000; // Adjust as needed
 
-// Function to simulate high CPU utilization
-void simulateHighCPU() {
-    int number = 2;
-    while (true) {
-        // Check if the number is prime
-        if (isPrime(number)) {
-            std::cout << number << " is prime." << std::endl;
-        }
-        number++;
+// Function to perform a CPU-intensive computation
+void compute() {
+    // Perform some CPU-intensive computation
+    for (unsigned long long i = 0; i < ITERATIONS_PER_THREAD; ++i) {
+        // Here you can perform any computation that takes CPU cycles
+        // For simplicity, we'll just perform some arithmetic operations
+        volatile double result = std::sqrt(std::sin(i) * std::cos(i));
+
+        // if i is modulus of 1000000, print the value of i
+        if (i % 1000000 == 0) {
+			std::cout << "Thread ID: " << std::this_thread::get_id() << " i: " << i << std::endl;
+		}
     }
 }
 
 int main() {
-    	int test = 0;
-
-    // Get the number of CPU cores1
+    int test = 0;
+    
+    // Get the number of CPU cores
     unsigned int num_cores = std::thread::hardware_concurrency();
     std::cout << "Number of CPU cores: " << num_cores << std::endl;
 
     std::cin >> test;
 
+    std::cout << "Testing Cores";
+
     // Create a vector to hold thread objects
     std::vector<std::thread> threads;
 
-    // Create a thread for each CPU core
+    // Start threads to utilize all CPU cores
     for (unsigned int i = 0; i < num_cores; ++i) {
-        threads.push_back(std::thread(simulateHighCPU));
+        threads.emplace_back(compute);
     }
 
     // Join all threads
@@ -52,7 +45,7 @@ int main() {
         thread.join();
     }
 
-    std::cin >> test;
+    std::cout << "All threads have finished." << std::endl;
 
     return 0;
 }
